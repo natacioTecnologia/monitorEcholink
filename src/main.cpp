@@ -25,6 +25,7 @@ void setDuty(int duty);
 float getVoltage();
 void cooler(float temp);
 void event();
+void status();
 
 void setup()
 {
@@ -69,7 +70,6 @@ void setup()
  
 void loop(){  
   wdt_reset();
-
   sensor.requestTemperatures();
   float tempC = sensor.getTempCByIndex(0);
   cooler(tempC);
@@ -78,31 +78,17 @@ void loop(){
   lcd.print(tempC);
   lcd.setCursor(10,0);
   lcd.print("C");
-  wdt_reset();
+  status();
   if (protect == 0)
   {
     lcd.setCursor(4,1);
     lcd.print(getVoltage());
     lcd.setCursor(10,1);
     lcd.print("V");
-    wdt_reset();
   }else{
     lcd.setCursor(4,1);
     lcd.print("Protect...");
-    wdt_reset();
   }
-
-  if(txFlag == 'T' && protect != 1){
-    lcd.setCursor(14,0);
-    lcd.print("TX");
-    wdt_reset();
-  }else if(txFlag == 'R'){
-    lcd.setCursor(14,0);
-    lcd.print("RX");
-    wdt_reset();
-  }
-
-  delay(10);
 }
 
 
@@ -150,13 +136,22 @@ void cooler(float temp){
 
 void serialEvent(){
   while (Serial.available()) {
-      txFlag = (char)Serial.read(); 
-      wdt_reset(); 
+    char buffer = (char)Serial.read(); 
+    if(buffer != 'C'){
+      if(buffer != txFlag)
+        txFlag = buffer;
+    } 
   }
+  txFlag == 'T' && protect != 1 ? setBit(PORTB,PB5) : clearBit(PORTB,PB5);
+}
 
-  if(txFlag == 'T' && protect != 1){
-    setBit(PORTB,PB5);
+void status(){
+ if(txFlag == 'T' && protect != 1){
+    lcd.setCursor(14,0);
+    lcd.print("TX");
+    wdt_reset();
   }else if(txFlag == 'R'){
-    clearBit(PORTB,PB5);
+    lcd.setCursor(14,0);
+    lcd.print("RX");
   }
 }
