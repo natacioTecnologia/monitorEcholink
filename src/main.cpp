@@ -19,7 +19,7 @@ DallasTemperature sensor (&oneWire);
 int sensorValue = 0;
 char txFlag = 'R' ;
 char protect = 0;
-float tempProt = 56.6;
+float tempProt = 52.1;
 
 void setDuty(int duty);
 float getVoltage();
